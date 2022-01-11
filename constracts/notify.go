@@ -5,7 +5,7 @@
 // @Site: https://www.classmatelin.top
 // @Description:
 
-package constract
+package constracts
 
 type Notify interface {
 	Send(title string, message string)

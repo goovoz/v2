@@ -6,7 +6,7 @@
 // @Description:
 // @Cron: * */1 * * *
 
-package constract
+package constracts
 
 import (
 	"scripts/config/jd"

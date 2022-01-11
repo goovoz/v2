@@ -11,7 +11,7 @@
 │   ├── config.go    // 根配置
 │   ├── config.json  // 配置文件
 │   └── jd  // 子配置项
-├── constract  // interface 定义
+├── contracts  // interface 定义
 │   ├── jd.go
 │   └── notify.go
 ├── database  // database 相关

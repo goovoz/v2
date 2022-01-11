@@ -3,7 +3,7 @@
 // @Author: ClassmateLin
 // @Email: classmatelin.site@gmail.com
 // @Site: https://www.classmatelin.top
-// @Description:
+// @Description: 汪汪乐园
 // @Cron: 0 5 * * *
 package main
 
@@ -13,7 +13,7 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/tidwall/gjson"
 	"scripts/config/jd"
-	"scripts/constract"
+	"scripts/constracts"
 	"scripts/global"
 	"scripts/structs"
 	"time"
@@ -31,7 +31,7 @@ type JdJoyPark struct {
 // @description: 初始化JdJoyPark
 // @param:  user
 // @return: JdJoyPark
-func (JdJoyPark) New(user jd.User) constract.Jd {
+func (JdJoyPark) New(user jd.User) constracts.Jd {
 	obj := JdJoyPark{}
 	obj.User = user
 	obj.client = resty.New().R().

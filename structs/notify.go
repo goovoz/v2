@@ -13,7 +13,7 @@ import (
 	"github.com/russross/blackfriday"
 	"github.com/spf13/viper"
 	"github.com/tidwall/gjson"
-	"scripts/constract"
+	"scripts/constracts"
 	"sync"
 )
 
@@ -166,7 +166,7 @@ func (s ServerJNotify) Send(title string, message string) {
 // @param:  title
 // @param:  message
 func Notify(vp *viper.Viper, title string, message string) {
-	var notifyList []constract.Notify
+	var notifyList []constracts.Notify
 
 	notifyConfig := vp.GetStringMap(`notify`)
 
@@ -204,7 +204,7 @@ func Notify(vp *viper.Viper, title string, message string) {
 	var wg sync.WaitGroup
 	for _, notify := range notifyList {
 		wg.Add(1)
-		go func(notify constract.Notify, title string, message string, wg *sync.WaitGroup) {
+		go func(notify constracts.Notify, title string, message string, wg *sync.WaitGroup) {
 			defer wg.Done()
 			notify.Send(title, message)
 		}(notify, title, message, &wg)

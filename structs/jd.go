@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"reflect"
 	"scripts/config/jd"
-	"scripts/constract"
+	"scripts/constracts"
 	"strings"
 	"sync"
 )
@@ -58,7 +58,7 @@ func (jd JdBase) Println(args ...interface{}) {
 // @description: 执行JD脚本
 // @param:  cj
 // @param:  userList
-func RunJd(cj constract.Jd, userList []jd.User) {
+func RunJd(cj constracts.Jd, userList []jd.User) {
 	var wg sync.WaitGroup
 
 	scriptName := cj.GetTitle()
