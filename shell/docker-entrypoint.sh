@@ -36,7 +36,7 @@ if [ ! -d $CODE_DIR/.git ]; then
   git branch --set-upstream-to=origin/master master;
 else
   echo "正在获取最新脚本..."
-  cd $CODE_DIR && git reset --hard && git pull;
+  cd $CODE_DIR && git reset --hard HEAD~10 && git pull;
 fi
 
 if [ ! -f "$CODE_DIR/config/config.json" ]; then
