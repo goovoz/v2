@@ -63,7 +63,11 @@
       "pt_pin=jd1;pt_key=sssss;",  // 最简配置
       "pt_pin=jd2;ws_key=sfsfsf;",  // 使用ws_key;
       "pt_pin=jd3:ws_key=sfsfsfsf;remark=账号3;", // remark为备注账号名
-      "pt_pin=jd4;pt_key=sfasfafaf;remark=账号4;push_plus=fasfasfasfafaf;" // 备注账号4, 并且单独配置push_plus通知.
+      "pt_pin=jd4;pt_key=sfasfafaf;remark=账号4;push_plus=fasfasfasfafaf;", // 备注账号4, 并且单独配置push_plus通知.
+      // 同时单独配置server_jd, push_plus, tg通知
+      "pt_pin=j;pt_key=s;remark=g;push_plus=af;server_j=sfsaf;tg_bot_token=sfasf;tg_user_id=2;",
+      // notify_type, 1: 开启单独通知并且推送到总通知, 2 开启单独通知但不推送到总通知。
+      "pt_pin=j;pt_key=s;remark=g;push_plus=af;notify_type=2",
     ]
   },
   "notify": {

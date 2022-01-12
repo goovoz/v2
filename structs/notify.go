@@ -13,7 +13,9 @@ import (
 	"github.com/russross/blackfriday"
 	"github.com/spf13/viper"
 	"github.com/tidwall/gjson"
+	"scripts/config/jd"
 	"scripts/constracts"
+	"scripts/global"
 	"sync"
 )
 
@@ -36,12 +38,22 @@ func (tg TgNotify) New(botToken string, userId string) TgNotify {
 	return tg
 }
 
+// Title
+// @Description: 返回通知类型
+// @receiver tg
+// @return string
+//
+func (tg TgNotify) Title() string {
+	return "telegram"
+}
+
 // Send
 // @description: 发送消息
 // @receiver : tg
 // @param:  title
 // @param:  message
-func (tg TgNotify) Send(title string, message string) {
+func (tg TgNotify) Send(title string, message string) bool {
+
 	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", tg.BotToken)
 
 	client := resty.New()
@@ -56,13 +68,14 @@ func (tg TgNotify) Send(title string, message string) {
 	}).Post(url)
 
 	if err != nil {
-		fmt.Println("Telegram 推送失败...")
+		return false
 	}
 
 	if ok := gjson.Get(resp.String(), `ok`).Bool(); ok {
-		fmt.Println("Telegram 推送成功...")
+		return true
 	} else {
-		fmt.Printf("Telegram 推送失败, %s\n...", resp.String())
+		global.Log.Error(resp.String())
+		return false
 	}
 }
 
@@ -82,12 +95,21 @@ func (p PushPlusNotify) New(token string) PushPlusNotify {
 	return p
 }
 
+// Title
+// @Description: 返回通知类型
+// @receiver tg
+// @return string
+//
+func (p PushPlusNotify) Title() string {
+	return "push+"
+}
+
 // Send
 // @description: 推送消息
 // @receiver : p
 // @param:  title
 // @param:  message
-func (p PushPlusNotify) Send(title string, message string) {
+func (p PushPlusNotify) Send(title string, message string) bool {
 	url := "https://pushplus.hxtrip.com/send"
 
 	client := resty.New()
@@ -104,13 +126,13 @@ func (p PushPlusNotify) Send(title string, message string) {
 	}).Post(url)
 
 	if err != nil {
-		fmt.Println("push plus 推送失败...")
+		return false
 	}
-
 	if code := gjson.Get(resp.String(), `code`).Int(); code == 200 {
-		fmt.Println("push plus 推送成功...")
+		return true
 	} else {
-		fmt.Printf("push plus 推送失败, %s\n", resp.String())
+		global.Log.Error(resp.String())
+		return false
 	}
 }
 
@@ -130,12 +152,21 @@ func (s ServerJNotify) New(sendKey string) ServerJNotify {
 	return s
 }
 
+// Title
+// @Description: 返回通知类型
+// @receiver tg
+// @return string
+//
+func (s ServerJNotify) Title() string {
+	return "telegram"
+}
+
 // Send
 // @description: 发送消息
 // @receiver : s
 // @param:  title
 // @param:  message
-func (s ServerJNotify) Send(title string, message string) {
+func (s ServerJNotify) Send(title string, message string) bool {
 	url := fmt.Sprintf("https://sc.ftqq.com/%s.send", s.SendKey)
 
 	client := resty.New()
@@ -150,13 +181,53 @@ func (s ServerJNotify) Send(title string, message string) {
 	}).Post(url)
 
 	if err != nil {
-		fmt.Println("server酱 推送失败...")
+		return false
 	}
 
 	if code := gjson.Get(resp.String(), `code`).Int(); code == 0 {
-		fmt.Println("server酱 推送成功...")
+		return true
 	} else {
-		fmt.Printf("server酱 推送失败, %s...\n", resp.String())
+		global.Log.Error(resp.String())
+		return false
+	}
+}
+
+// SingleNotify
+//  @Description:
+//  @param user
+//  @param title
+//  @param message
+//
+func SingleNotify(user jd.User, title string, message string) {
+
+	if user.TgUserId != "" && user.TgBotToken != "" {
+		notify := TgNotify{}.New(user.TgBotToken, user.TgUserId)
+		isSuccess := notify.Send(title, message)
+		if isSuccess {
+			fmt.Printf("%s, %s消息推送成功...\n", user.Username, notify.Title())
+		} else {
+			fmt.Printf("%s, %s消息推送失败...\n", user.Username, notify.Title())
+		}
+	}
+
+	if user.ServerJ != "" {
+		notify := ServerJNotify{}.New(user.ServerJ)
+		isSuccess := notify.Send(title, message)
+		if isSuccess {
+			fmt.Printf("%s, %s消息推送成功...\n", user.Username, notify.Title())
+		} else {
+			fmt.Printf("%s, %s消息推送失败...\n", user.Username, notify.Title())
+		}
+	}
+
+	if user.PushPlus != "" {
+		notify := PushPlusNotify{}.New(user.PushPlus)
+		isSuccess := notify.Send(title, message)
+		if isSuccess {
+			fmt.Printf("%s, %s消息推送成功...\n", user.Username, notify.Title())
+		} else {
+			fmt.Printf("%s, %s消息推送失败...\n", user.Username, notify.Title())
+		}
 	}
 }
 
@@ -206,7 +277,12 @@ func Notify(vp *viper.Viper, title string, message string) {
 		wg.Add(1)
 		go func(notify constracts.Notify, title string, message string, wg *sync.WaitGroup) {
 			defer wg.Done()
-			notify.Send(title, message)
+			isSuccess := notify.Send(title, message)
+			if isSuccess {
+				fmt.Printf("%s消息推送成功...\n", notify.Title())
+			} else {
+				fmt.Printf("%s消息推送失败...\n", notify.Title())
+			}
 		}(notify, title, message, &wg)
 	}
 	wg.Wait()

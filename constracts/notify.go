@@ -8,5 +8,6 @@
 package constracts
 
 type Notify interface {
-	Send(title string, message string)
+	Send(title string, message string) bool
+	Title() string // 标示通知, 如 server酱
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/tidwall/gjson"
 	"log"
 	"net/http"
+	"net/url"
 	"regexp"
 	"scripts/config"
 	"scripts/global"
@@ -32,6 +33,7 @@ type User struct {
 	TgUserId   string            // Tg 用户ID
 	ServerJ    string            // server酱 sendKey 配置
 	PushPlus   string            // push+ token 配置
+	NotifyType string            // 通知类型: 默认: 1, 开启单独通知且推送到总通知, 2:开启单独通知但不推送到总通知
 }
 
 // GetPtKeyByWsKey 通过ws_key换取pt_key
@@ -106,7 +108,7 @@ func init() {
 		}
 
 		r, _ := regexp.Compile("([^=]+)=([^;]+);?\\s*")
-		itemList := r.FindAllString(cookie, 3)
+		itemList := r.FindAllString(cookie, 10)
 
 		for _, item := range itemList {
 
@@ -135,6 +137,8 @@ func init() {
 				user.ServerJ = strings.ReplaceAll(temp[1], ";", "")
 			case "push_plus":
 				user.PushPlus = strings.ReplaceAll(temp[1], ";", "")
+			case "notify_type":
+				user.NotifyType = strings.ReplaceAll(temp[1], ";", "")
 			}
 		}
 
@@ -151,8 +155,14 @@ func init() {
 		}
 
 		if user.Username == "" {
-			user.Username = user.PtPin
+			username, _ := url.QueryUnescape(user.PtPin)
+			user.Username = username
 		}
+
+		if user.NotifyType == "" {
+			user.NotifyType = "1"
+		}
+
 		user.Sort = index + 1
 		UserList = append(UserList, user)
 	}

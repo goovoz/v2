@@ -43,7 +43,8 @@ func isValidCookie(cookie string) bool {
 
 func main() {
 
-	hasInvalid := false // 是否有过期的cookies
+	invalidUserNum := 0         // invalid的账号数量
+	hasNeedTotalNotify := false // 是否需要进行总的推送
 
 	title := "Cookies过期通知\n"
 
@@ -52,16 +53,24 @@ func main() {
 	for _, user := range jd.UserList {
 		isValid := isValidCookie(user.CookieStr)
 		if !isValid {
-			message += " - " + user.Username + "\n"
-			hasInvalid = true
+			fmt.Printf("账号: %s, cookies已过期...\n", user.Username)
+			structs.SingleNotify(user, title, fmt.Sprintf("您的jd cookies已过期..."))
+			if user.NotifyType == "1" { // 添加到总通知
+				message += " - " + user.Username + "\n"
+				invalidUserNum += 1
+				hasNeedTotalNotify = true
+			} else { // 不添加到总通知
+				invalidUserNum += 1
+			}
 		}
 	}
 
-	if hasInvalid {
-		fmt.Println(message)
+	if hasNeedTotalNotify {
 		structs.Notify(config.VP, title, message)
 	} else {
-		fmt.Println("暂无过期账号...")
+		if invalidUserNum == 0 {
+			fmt.Println("暂无过期账号...")
+		}
 	}
 
 }
