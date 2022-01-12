@@ -69,6 +69,9 @@ chmod +x $CODE_DIR/*.bin;
 echo "正在更新定时任务...";
 go run $CODE_DIR/tools/update_crontab.go;
 
+echo "重启cron..."
+/etc/init.d/cron restart;
+
 echo "正在更新docker-entrypoint命令...";
 cp $CODE_DIR/shell/docker-entrypoint.sh /bin/docker-entrypoint;
 chmod +x /bin/docker-entrypoint;
