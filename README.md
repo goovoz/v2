@@ -46,7 +46,7 @@
 - 拉取镜像: `docker pull classmatelin/scripts_v2:latest`
 - 创建容器: `docker run -itd --name scripts_v2 classmatelin/scripts_v2:latest`
 - 进入容器: `docker exec -it scripts_v2 bash`
-- 注: `arm64请将classmatelin/scripts_v2:latest替换为classmatelin/scripts_v2:arm64`
+- 注: `n1盒子等请将classmatelin/scripts_v2:latest替换为classmatelin/scripts_v2:n1`
 
 ## 使用
 
