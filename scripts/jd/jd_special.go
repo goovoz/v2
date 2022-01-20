@@ -4,7 +4,7 @@
 // @Email: classmatelin.site@gmail.com
 // @Site: https://www.classmatelin.top
 // @Description: 京东app下拉 特物
-// @Cron: * */1 * * *
+// @Cron: 10 10 * * *
 
 package main
 
@@ -20,6 +20,8 @@ import (
 	"time"
 )
 
+// JdSpecial
+// @Description:
 type JdSpecial struct {
 	structs.JdBase
 	client           *resty.Request
@@ -27,6 +29,11 @@ type JdSpecial struct {
 	encryptProjectId string
 }
 
+// New
+// @Description:
+// @receiver j
+// @param user
+// @return JdSpecial
 func (j JdSpecial) New(user jd.User) JdSpecial {
 	obj := JdSpecial{}
 	obj.User = user
@@ -42,12 +49,17 @@ func (j JdSpecial) New(user jd.User) JdSpecial {
 	return obj
 }
 
+// Request
+// @Description:
+// @receiver j
+// @param fn
+// @param body
+// @return string
 func (j JdSpecial) Request(fn string, body map[string]interface{}) string {
 	content, err := json.Marshal(body)
 
 	link := fmt.Sprintf("https://api.m.jd.com/api?functionId=%s&appid=ProductZ4Brand&client=wh5&t=%d&body=%s",
 		fn, time.Now().UnixNano()/1e6, url.QueryEscape(string(content)))
-	fmt.Println(link)
 	resp, err := j.client.SetBody(body).Post(link)
 	if err != nil {
 		return ""
@@ -70,7 +82,7 @@ func (j JdSpecial) GetActivityInfo() bool {
 
 	j.activityId = int(gjson.Get(data, `data.result.activityBaseInfo.activityId`).Int())
 	j.encryptProjectId = gjson.Get(data, `data.result.activityBaseInfo.encryptProjectId`).String()
-	fmt.Println(gjson.Get(data, `data.result.activityBaseInfo.activityId`))
+
 	if j.activityId == 0 || j.encryptProjectId == "" {
 		j.Println("获取活动ID失败...")
 		return false
@@ -95,22 +107,73 @@ func (j JdSpecial) DoTask() {
 
 	taskList := gjson.Get(data, `task.taskList`).Array()
 
-	//if len(taskList) == 0 {
-	//	j.Println("今日暂无任务...")
-	//	return
-	//}
+	if len(taskList) == 0 {
+		j.Println("今日暂无任务...")
+		return
+	}
 	for _, task := range taskList {
-		j.Println(task)
+
+		completionCnt := gjson.Get(task.String(), `completionCnt`).Int()
+		assignmentTimesLimit := gjson.Get(task.String(), `assignmentTimesLimit`).Int()
+		data := gjson.Get(task.String(), `ext.shoppingActivity`).Array()
+
+		if len(data) < 1 {
+			continue
+		}
+
+		ext := data[0].String()
+		title := gjson.Get(ext, `title`)
+		encryptAssignmentId := gjson.Get(ext, `encryptAssignmentId`)
+		advId := gjson.Get(ext, `advId`)
+
+		if completionCnt >= assignmentTimesLimit {
+			j.Println(fmt.Sprintf("%s, 已完成...", title))
+			continue
+		}
+
+		res := j.Request("superBrandDoTask", map[string]interface{}{
+			"source":              "secondfloor",
+			"activityId":          j.activityId,
+			"encryptProjectId":    j.encryptProjectId,
+			"encryptAssignmentId": encryptAssignmentId,
+			"assignmentType":      1,
+			"itemId":              advId,
+			"actionType":          0,
+		})
+
+		j.Println(fmt.Sprintf("%s任务结果:%s", title, gjson.Get(res, `data.bizMsg`)))
+
+		time.Sleep(time.Second * 2)
+
 	}
 
 }
 
+// Lottery
+// @Description: 抽奖
+// @receiver j
+func (j JdSpecial) Lottery() {
+	data := j.Request("superBrandSecondFloorMainPage", map[string]interface{}{"source": "secondfloor"})
+	userStarNum := int(gjson.Get(data, `data.result.activityUserInfo.userStarNum`).Int())
+	j.Println(fmt.Sprintf("可抽奖次数:%d", userStarNum))
+
+	for i := 0; i < userStarNum; i++ {
+		res := j.Request("superBrandTaskLottery", map[string]interface{}{"source": "secondfloor", "activityId": j.activityId})
+		j.Println(fmt.Sprintf("第%d次抽奖结果:%s", i+1, res))
+		time.Sleep(time.Second * 2)
+	}
+}
+
+// Exec
+// @Description:
+// @receiver j
 func (j JdSpecial) Exec() {
 	success := j.GetActivityInfo()
 	if !success {
 		return
 	}
 	j.DoTask()
+	j.Lottery()
 }
 
 func main() {
