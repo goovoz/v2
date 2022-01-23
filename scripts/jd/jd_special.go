@@ -15,6 +15,7 @@ import (
 	"github.com/tidwall/gjson"
 	url "net/url"
 	"scripts/config/jd"
+	"scripts/constracts"
 	"scripts/global"
 	"scripts/structs"
 	"time"
@@ -34,7 +35,7 @@ type JdSpecial struct {
 // @receiver j
 // @param user
 // @return JdSpecial
-func (j JdSpecial) New(user jd.User) JdSpecial {
+func (j JdSpecial) New(user jd.User) constracts.Jd {
 	obj := JdSpecial{}
 	obj.User = user
 	obj.client = resty.New().R().SetHeaders(map[string]string{
@@ -88,6 +89,14 @@ func (j JdSpecial) GetActivityInfo() bool {
 		return false
 	}
 	return true
+}
+
+// GetTitle
+// @description: 显示标题
+// @receiver : j
+// @return: interface{}
+func (j JdSpecial) GetTitle() interface{} {
+	return "特物"
 }
 
 // DoTask
@@ -177,6 +186,5 @@ func (j JdSpecial) Exec() {
 }
 
 func main() {
-	j := JdSpecial{}.New(jd.UserList[0])
-	j.Exec()
+	structs.RunJd(JdSpecial{}, jd.UserList)
 }
