@@ -170,7 +170,7 @@ class Elm:
         :return:
         """
         task_name = task['showTitle']
-        if task['rewardStatus'] == 'SUCCESS':
+        if task['rewardStatus'] == 'SUCCESS' or task['missionType'] == 'PAGEVIEW':
             self.print(f'{task_name} 已完成...')
             return
 
@@ -189,13 +189,13 @@ class Elm:
         else:
             self.print(f'无法完成任务:《{task_name}》, ', res)
 
-        if task['missionType'] == 'PAGEVIEW':
-            url = task['missionActionUrl'] +'?missioncollectid={}&missionid={}&taskfrom={}&' \
-                                            'bizscene=svip&taskpageviewasac=2A21119A45TTVAEXP40N7N&' \
-                                            'spm=a2ogi.chihuo_home_tasklist.tasklayer_scantask.{}'.format(task['missionCollectionId'], task['missionDefId'], task['pageSpm'], task['finalStageCount'])
-            await session.get(url)
-            self.print(f'任务:《{task_name}》进行中, 等待15s...')
-            await asyncio.sleep(15.1)
+        # if task['missionType'] == 'PAGEVIEW':
+        #     url = task['missionActionUrl'] +'?missioncollectid={}&missionid={}&taskfrom={}&' \
+        #                                     'bizscene=svip&taskpageviewasac=2A21119A45TTVAEXP40N7N&' \
+        #                                     'spm=a2ogi.chihuo_home_tasklist.tasklayer_scantask.{}'.format(task['missionCollectionId'], task['missionDefId'], task['pageSpm'], task['finalStageCount'])
+        #     await session.get(url)
+        #     self.print(f'任务:《{task_name}》进行中, 等待15s...')
+        #     await asyncio.sleep(15.1)
 
     async def query(self, session):
         """
